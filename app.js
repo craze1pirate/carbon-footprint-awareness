@@ -8,7 +8,7 @@
 import {
   calculateTransport, calculateFood, calculateEnergy,
   calculateShopping, calculateDigital, getTotal,
-  generateRoadmap, getAnalogies, formatKg, numberCounter, getTier,
+  generateRoadmap, formatKg, getTier,
 } from './calculator.js';
 
 import {
@@ -16,38 +16,43 @@ import {
 } from './visualization.js';
 
 import {
-  analyzeAction, saveApiKey, clearApiKey, hasApiKey,
-  getMaskedKey, sanitizeInput,
+  analyzeAction, hasApiKey, getMaskedKey, sanitizeInput,
 } from './nudge-engine.js';
 
 import {
-  loadState, saveState, joinChallenge, dailyCheckIn,
+  loadState, joinChallenge, dailyCheckIn,
   abandonChallenge, checkBadges, markCalculatorComplete,
   markShared, getLeaderboard, getBestStreak, getActiveChallengeCount,
-  getTotalCO2Saved, getStreakEmoji, getStreakDots, isStreakBroken,
+  getStreakEmoji, getStreakDots, isStreakBroken,
   CHALLENGES, BADGES,
 } from './gamification.js';
 
 import {
-  generateShareCard, downloadCard, nativeShare,
-  generateShareText,
+  downloadCard, nativeShare, generateShareText, generateShareCard,
 } from './share.js';
 
-// ─── APP STATE ───────────────────────────────────────────────────────────────
+/**
+ * AppState Singleton representing the runtime state of the application.
+ * @type {Object}
+ */
 const AppState = {
-  currentSection:   'home',
+  currentSection: 'home',
   calculatorInputs: {},
-  results:          null,         // { totalKg, tier, tierInfo, breakdown, analogies, percentages }
-  gamification:     loadState(),  // persisted gamification state
+  results: null,         // { totalKg, tier, tierInfo, breakdown, analogies, percentages }
+  gamification: loadState(),  // persisted gamification state
   planetInitialized: false,
 };
 
-// Expose for inline onclick handlers
+// Expose navigation for inline onclick handlers in the SPA
 window.CarbonMirror = { navigate };
 
 // ─── NAVIGATION ──────────────────────────────────────────────────────────────
 const SECTIONS = ['home', 'calculator', 'dashboard', 'nudge', 'challenges', 'roadmap'];
 
+/**
+ * Handles seamless SPA hash-based section routing with transitions.
+ * @param {string} sectionId - The ID of the target section.
+ */
 function navigate(sectionId) {
   if (!SECTIONS.includes(sectionId)) return;
 
@@ -62,8 +67,7 @@ function navigate(sectionId) {
   const next = document.getElementById(`section-${sectionId}`);
   if (next) {
     next.style.display = 'block';
-    // Trigger reflow
-    void next.offsetWidth;
+    void next.offsetWidth; // Trigger reflow for CSS animations
     next.classList.add('active');
   }
 
@@ -74,7 +78,7 @@ function navigate(sectionId) {
   });
 
   AppState.currentSection = sectionId;
-  window.location.hash    = sectionId;
+  window.location.hash = sectionId;
 
   // Section-specific init
   if (sectionId === 'dashboard' && !AppState.planetInitialized) {
@@ -105,17 +109,22 @@ function navigate(sectionId) {
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
-// Hash routing on load
+/**
+ * Bootstraps initial route on application load using the location hash.
+ */
 function initRouting() {
   const hash = window.location.hash.replace('#', '') || 'home';
   const section = SECTIONS.includes(hash) ? hash : 'home';
-  // Show home by default, navigate to hash
   if (section !== 'home') {
     setTimeout(() => navigate(section), 100);
   }
 }
 
 // ─── CALCULATOR WIRING ───────────────────────────────────────────────────────
+
+/**
+ * Wires range inputs, event listeners, and live display elements for the carbon calculator.
+ */
 function initCalculator() {
   // Tab switching
   document.querySelectorAll('.calc-tab').forEach(tab => {
@@ -127,30 +136,30 @@ function initCalculator() {
 
   // Range inputs → live display
   const rangeInputs = [
-    ['transport-km-week',      'transport-km-display',           v => `${v} km`],
-    ['transport-public-km',    'transport-public-km-display',    v => `${v} km`],
-    ['transport-flights',      'transport-flights-display',      v => `${v} flight${v!=1?'s':''}`],
-    ['food-chicken-week',      'food-chicken-display',           v => `${v} serving${v!=1?'s':''}`],
-    ['food-red-meat-week',     'food-red-meat-display',          v => `${v} serving${v!=1?'s':''}`],
-    ['food-eggs-week',         'food-eggs-display',              v => `${v} egg${v!=1?'s':''}`],
-    ['food-delivery-week',     'food-delivery-display',          v => `${v} order${v!=1?'s':''}`],
-    ['energy-electricity-kwh', 'energy-electricity-display',     v => `${v} kWh`],
-    ['energy-lpg-cylinders',   'energy-lpg-display',             v => `${v} cyl`],
-    ['energy-ac-hrs',          'energy-ac-display',              v => `${v} hrs`],
-    ['energy-ac-months',       'energy-ac-months-display',       v => `${v} month${v!=1?'s':''}`],
-    ['shopping-new-clothes',   'shopping-clothes-display',       v => `${v} item${v!=1?'s':''}`],
-    ['shopping-smartphones',   'shopping-phones-display',        v => `${v} phone${v!=1?'s':''}`],
-    ['shopping-laptops',       'shopping-laptops-display',       v => `${v} laptop${v!=1?'s':''}`],
-    ['shopping-online-orders', 'shopping-orders-display',        v => `${v} order${v!=1?'s':''}`],
-    ['shopping-large-appliances','shopping-appliances-display',  v => `${v} item${v!=1?'s':''}`],
-    ['digital-streaming-hrs',  'digital-streaming-display',      v => `${v} hrs`],
-    ['digital-social-hrs',     'digital-social-display',         v => `${v} hrs`],
-    ['digital-video-calls-hrs','digital-calls-display',          v => `${v} hr${v!=1?'s':''}`],
-    ['digital-gaming-hrs',     'digital-gaming-display',         v => `${v} hrs`],
+    ['transport-km-week', 'transport-km-display', v => `${v} km`],
+    ['transport-public-km', 'transport-public-km-display', v => `${v} km`],
+    ['transport-flights', 'transport-flights-display', v => `${v} flight${v != 1 ? 's' : ''}`],
+    ['food-chicken-week', 'food-chicken-display', v => `${v} serving${v != 1 ? 's' : ''}`],
+    ['food-red-meat-week', 'food-red-meat-display', v => `${v} serving${v != 1 ? 's' : ''}`],
+    ['food-eggs-week', 'food-eggs-display', v => `${v} egg${v != 1 ? 's' : ''}`],
+    ['food-delivery-week', 'food-delivery-display', v => `${v} order${v != 1 ? 's' : ''}`],
+    ['energy-electricity-kwh', 'energy-electricity-display', v => `${v} kWh`],
+    ['energy-lpg-cylinders', 'energy-lpg-display', v => `${v} cyl`],
+    ['energy-ac-hrs', 'energy-ac-display', v => `${v} hrs`],
+    ['energy-ac-months', 'energy-ac-months-display', v => `${v} month${v != 1 ? 's' : ''}`],
+    ['shopping-new-clothes', 'shopping-clothes-display', v => `${v} item${v != 1 ? 's' : ''}`],
+    ['shopping-smartphones', 'shopping-phones-display', v => `${v} phone${v != 1 ? 's' : ''}`],
+    ['shopping-laptops', 'shopping-laptops-display', v => `${v} laptop${v != 1 ? 's' : ''}`],
+    ['shopping-online-orders', 'shopping-orders-display', v => `${v} order${v != 1 ? 's' : ''}`],
+    ['shopping-large-appliances', 'shopping-appliances-display', v => `${v} item${v != 1 ? 's' : ''}`],
+    ['digital-streaming-hrs', 'digital-streaming-display', v => `${v} hrs`],
+    ['digital-social-hrs', 'digital-social-display', v => `${v} hrs`],
+    ['digital-video-calls-hrs', 'digital-calls-display', v => `${v} hr${v != 1 ? 's' : ''}`],
+    ['digital-gaming-hrs', 'digital-gaming-display', v => `${v} hrs`],
   ];
 
   rangeInputs.forEach(([inputId, displayId, formatter]) => {
-    const input   = document.getElementById(inputId);
+    const input = document.getElementById(inputId);
     const display = document.getElementById(displayId);
     if (!input || !display) return;
 
@@ -159,7 +168,7 @@ function initCalculator() {
       updateProgress();
     };
     input.addEventListener('input', update);
-    update(); // init
+    update();
   });
 
   // Vehicle select → show/hide km group
@@ -181,6 +190,10 @@ function initCalculator() {
   });
 }
 
+/**
+ * Handles toggling between panels in the calculator wizard.
+ * @param {string} tabId - Target tab identifier.
+ */
 function switchCalcTab(tabId) {
   document.querySelectorAll('.calc-tab').forEach(tab => {
     const isActive = tab.dataset.tab === tabId;
@@ -193,12 +206,14 @@ function switchCalcTab(tabId) {
   updateProgress();
 }
 
+/**
+ * Dynamically updates the percentage and text of the progress bar based on user interaction.
+ */
 function updateProgress() {
-  const activeTab   = document.querySelector('.calc-tab.active');
-  const tabIndex    = activeTab ? SECTIONS.indexOf(activeTab.dataset.tab) : 0;
-  const tabs        = ['transport','food','energy','shopping','digital'];
+  const activeTab = document.querySelector('.calc-tab.active');
+  const tabs = ['transport', 'food', 'energy', 'shopping', 'digital'];
   const activeIndex = tabs.indexOf(activeTab?.dataset.tab ?? 'transport');
-  const pct         = Math.round(((activeIndex + 1) / tabs.length) * 100);
+  const pct = Math.round(((activeIndex + 1) / tabs.length) * 100);
 
   const fill = document.getElementById('calc-progress-fill');
   const text = document.getElementById('calc-progress-text');
@@ -206,6 +221,10 @@ function updateProgress() {
   if (text) text.textContent = `${tabs[activeIndex] ? capitalize(tabs[activeIndex]) : 'Transport'} tab — ${pct}% done`;
 }
 
+/**
+ * Gathers user values from all form inputs and structures them.
+ * @returns {Object} Structured user emission inputs.
+ */
 function gatherInputs() {
   const g = (id) => document.getElementById(id);
   const v = (id) => g(id)?.value ?? '';
@@ -213,60 +232,63 @@ function gatherInputs() {
 
   return {
     transport: {
-      vehicle:      v('transport-vehicle'),
-      kmPerWeek:    n('transport-km-week'),
-      publicDays:   v('transport-public-days'),
-      publicKmDay:  n('transport-public-km'),
-      publicType:   v('transport-public-type'),
-      flights:      n('transport-flights'),
-      flightKm:     n('transport-flight-distance'),
+      vehicle: v('transport-vehicle'),
+      kmPerWeek: n('transport-km-week'),
+      publicDays: v('transport-public-days'),
+      publicKmDay: n('transport-public-km'),
+      publicType: v('transport-public-type'),
+      flights: n('transport-flights'),
+      flightKm: n('transport-flight-distance'),
     },
     food: {
-      dietType:        v('food-diet-type'),
-      chickenPerWeek:  n('food-chicken-week'),
-      redMeatPerWeek:  n('food-red-meat-week'),
-      dairyLitresDay:  n('food-dairy-litres'),
-      eggsPerWeek:     n('food-eggs-week'),
+      dietType: v('food-diet-type'),
+      chickenPerWeek: n('food-chicken-week'),
+      redMeatPerWeek: n('food-red-meat-week'),
+      dairyLitresDay: n('food-dairy-litres'),
+      eggsPerWeek: n('food-eggs-week'),
       deliveryPerWeek: n('food-delivery-week'),
       wasteMultiplier: n('food-waste'),
     },
     energy: {
       electricityKwh: n('energy-electricity-kwh'),
-      lpgCylinders:   n('energy-lpg-cylinders'),
-      cookingType:    v('energy-cooking-type'),
-      acHrsDay:       n('energy-ac-hrs'),
-      acMonths:       n('energy-ac-months'),
-      solarLevel:     v('energy-solar'),
+      lpgCylinders: n('energy-lpg-cylinders'),
+      cookingType: v('energy-cooking-type'),
+      acHrsDay: n('energy-ac-hrs'),
+      acMonths: n('energy-ac-months'),
+      solarLevel: v('energy-solar'),
     },
     shopping: {
-      newClothesMonth:     n('shopping-new-clothes'),
-      smartphonesYear:     n('shopping-smartphones'),
-      laptopsYear:         n('shopping-laptops'),
-      onlineOrdersWeek:    n('shopping-online-orders'),
+      newClothesMonth: n('shopping-new-clothes'),
+      smartphonesYear: n('shopping-smartphones'),
+      laptopsYear: n('shopping-laptops'),
+      onlineOrdersWeek: n('shopping-online-orders'),
       largeAppliancesYear: n('shopping-large-appliances'),
     },
     digital: {
-      streamingHrsDay:  n('digital-streaming-hrs'),
+      streamingHrsDay: n('digital-streaming-hrs'),
       streamingQuality: v('digital-streaming-quality'),
-      socialHrsDay:     n('digital-social-hrs'),
-      videoCallHrsDay:  n('digital-video-calls-hrs'),
-      cloudGb:          n('digital-cloud-gb'),
-      gamingHrsDay:     n('digital-gaming-hrs'),
+      socialHrsDay: n('digital-social-hrs'),
+      videoCallHrsDay: n('digital-video-calls-hrs'),
+      cloudGb: n('digital-cloud-gb'),
+      gamingHrsDay: n('digital-gaming-hrs'),
     },
   };
 }
 
+/**
+ * Runs the main carbon calculations across categories and updates gamification state.
+ */
 function runCalculation() {
   const inputs = gatherInputs();
   AppState.calculatorInputs = inputs;
 
   const transport = calculateTransport(inputs.transport);
-  const food      = calculateFood(inputs.food);
-  const energy    = calculateEnergy(inputs.energy);
-  const shopping  = calculateShopping(inputs.shopping);
-  const digital   = calculateDigital(inputs.digital);
+  const food = calculateFood(inputs.food);
+  const energy = calculateEnergy(inputs.energy);
+  const shopping = calculateShopping(inputs.shopping);
+  const digital = calculateDigital(inputs.digital);
 
-  const results   = getTotal({ transport, food, energy, shopping, digital });
+  const results = getTotal({ transport, food, energy, shopping, digital });
   results.categoryResults = { transport, food, energy, shopping, digital };
   AppState.results = results;
 
@@ -282,8 +304,12 @@ function runCalculation() {
   showToast(`✨ Calculation complete! You emit ${formatKg(results.totalKg)} kg CO₂/year`, 'success');
 }
 
+/**
+ * Render the results of the calculation on the page.
+ * @param {Object} results - Calculation output results object.
+ */
 function renderResults(results) {
-  const { totalKg, tier, tierInfo, percentages } = results;
+  const { totalKg, tierInfo, percentages } = results;
 
   // Show results card
   const resultsEl = document.getElementById('calc-results');
@@ -295,12 +321,12 @@ function renderResults(results) {
 
   // Tier badge
   const tierBadge = document.getElementById('result-tier-badge');
-  const tierDesc  = document.getElementById('result-tier-desc');
+  const tierDesc = document.getElementById('result-tier-desc');
   if (tierBadge) tierBadge.textContent = `${tierInfo.icon} ${tierInfo.label}`;
-  if (tierDesc)  tierDesc.textContent  = tierInfo.description ?? '';
+  if (tierDesc) tierDesc.textContent = tierInfo.description ?? '';
 
   // Apply tier CSS class to body for dynamic color theming
-  document.body.classList.remove('tier--green','tier--yellow','tier--orange','tier--red');
+  document.body.classList.remove('tier--green', 'tier--yellow', 'tier--orange', 'tier--red');
   document.body.classList.add(tierInfo.cssClass);
 
   // Breakdown bars
@@ -333,6 +359,10 @@ function renderResults(results) {
 }
 
 // ─── DASHBOARD ───────────────────────────────────────────────────────────────
+
+/**
+ * Initializes Three.js (or fallback) rendering environment on the dashboard.
+ */
 async function initPlanetSection() {
   const canvas = document.getElementById('planet-canvas');
   if (!canvas) return;
@@ -351,11 +381,14 @@ async function initPlanetSection() {
   document.getElementById('planet-reset-btn')?.addEventListener('click', resetView);
 }
 
+/**
+ * Refreshes the dashboard tab to render calculations, visual effects, and analogies.
+ */
 function refreshDashboard() {
   const results = AppState.results;
   if (!results) return;
 
-  const { totalKg, tier, tierInfo, analogies, percentages } = results;
+  const { totalKg, tierInfo, analogies, percentages } = results;
 
   // Tier banner
   const tierBanner = document.getElementById('dashboard-tier-badge');
@@ -366,10 +399,10 @@ function refreshDashboard() {
   if (kgLabel) kgLabel.textContent = `${formatKg(totalKg)} kg CO₂`;
 
   // Analogies
-  setTextContent('analogy-drives',      `${analogies.delhiMumbaiDrives}×`);
-  setTextContent('analogy-trees',       `${analogies.treesNeeded.toLocaleString('en-IN')} trees`);
+  setTextContent('analogy-drives', `${analogies.delhiMumbaiDrives}×`);
+  setTextContent('analogy-trees', `${analogies.treesNeeded.toLocaleString('en-IN')} trees`);
   setTextContent('analogy-electricity', `${analogies.electricityMonths} months`);
-  setTextContent('analogy-flights',     `${analogies.domesticFlights}×`);
+  setTextContent('analogy-flights', `${analogies.domesticFlights}×`);
   setTextContent('analogy-india-compare', analogies.vsIndiaAvgLabel);
 
   // Update planet
@@ -400,8 +433,11 @@ function refreshDashboard() {
 }
 
 // ─── NUDGE ENGINE UI ─────────────────────────────────────────────────────────
+
+/**
+ * Configures event listeners, mode toggles, and examples for the AI nudge engine.
+ */
 function initNudge() {
-  // API Key toggle
   const toggle = document.getElementById('nudge-ai-toggle');
   const modeLabel = document.getElementById('nudge-mode-label');
   toggle?.addEventListener('change', () => {
@@ -427,18 +463,20 @@ function initNudge() {
   });
 }
 
+/**
+ * Triggers the carbon nudge analysis of the user's input and updates UI loading states.
+ */
 async function runNudgeScan() {
-  const input   = document.getElementById('nudge-input');
-  const query   = input?.value?.trim();
+  const input = document.getElementById('nudge-input');
+  const query = input?.value?.trim();
   if (!query || query.length < 3) {
     showToast('Please describe an action to scan.', 'error');
     return;
   }
 
   const aiToggle = document.getElementById('nudge-ai-toggle');
-  const useAI    = aiToggle?.checked ?? true;
+  const useAI = aiToggle?.checked ?? true;
 
-  // UI: loading state
   setNudgeLoading(true);
 
   try {
@@ -453,11 +491,15 @@ async function runNudgeScan() {
   }
 }
 
+/**
+ * Renders loading indicators when the nudge API is calculating emissions.
+ * @param {boolean} loading - Loading state active flag.
+ */
 function setNudgeLoading(loading) {
   const loadingEl = document.getElementById('nudge-loading');
-  const scanBtn   = document.getElementById('nudge-scan-btn');
-  const btnText   = document.getElementById('nudge-btn-text');
-  const resultEl  = document.getElementById('nudge-result');
+  const scanBtn = document.getElementById('nudge-scan-btn');
+  const btnText = document.getElementById('nudge-btn-text');
+  const resultEl = document.getElementById('nudge-result');
 
   if (loading) {
     loadingEl?.classList.add('visible');
@@ -471,16 +513,21 @@ function setNudgeLoading(loading) {
   }
 }
 
+/**
+ * Renders the returned result (alternatives and emotional analogy) of a nudge scan.
+ * @param {Object} result - Nudge engine output results object.
+ * @param {string} originalQuery - The raw query submitted.
+ */
 function renderNudgeResult(result, originalQuery) {
   setNudgeLoading(false);
 
-  const co2Badge    = document.getElementById('nudge-co2-badge');
-  const co2Value    = document.getElementById('nudge-co2-value');
+  const co2Badge = document.getElementById('nudge-co2-badge');
+  const co2Value = document.getElementById('nudge-co2-value');
   const actionLabel = document.getElementById('nudge-action-label');
-  const actionCtx   = document.getElementById('nudge-action-context');
-  const altsEl      = document.getElementById('nudge-alternatives');
-  const analogyEl   = document.getElementById('nudge-analogy');
-  const resultEl    = document.getElementById('nudge-result');
+  const actionCtx = document.getElementById('nudge-action-context');
+  const altsEl = document.getElementById('nudge-alternatives');
+  const analogyEl = document.getElementById('nudge-analogy');
+  const resultEl = document.getElementById('nudge-result');
 
   if (co2Value) co2Value.textContent = result.estimatedCO2Kg.toFixed(1);
   if (actionLabel) actionLabel.textContent = result.actionSummary;
@@ -489,14 +536,14 @@ function renderNudgeResult(result, originalQuery) {
   // Color badge by severity
   const severity = result.estimatedCO2Kg > 50 ? 'high' : result.estimatedCO2Kg > 5 ? 'medium' : 'low';
   const badgeColors = {
-    high:   'rgba(192,57,43,0.12)',
+    high: 'rgba(192,57,43,0.12)',
     medium: 'rgba(230,126,34,0.12)',
-    low:    'rgba(39,174,96,0.12)',
+    low: 'rgba(39,174,96,0.12)',
   };
   const badgeBorders = { high: 'var(--color-red-tier)', medium: 'var(--color-orange-tier)', low: 'var(--color-green-tier)' };
   if (co2Badge) {
-    co2Badge.style.background    = badgeColors[severity];
-    co2Badge.style.borderColor   = badgeBorders[severity];
+    co2Badge.style.background = badgeColors[severity];
+    co2Badge.style.borderColor = badgeBorders[severity];
     co2Badge.style.setProperty('--badge-color', badgeBorders[severity]);
   }
 
@@ -519,33 +566,40 @@ function renderNudgeResult(result, originalQuery) {
 }
 
 // ─── GAMIFICATION UI ─────────────────────────────────────────────────────────
-function renderPointsSummary() {
-  const gs      = AppState.gamification;
-  const points  = gs.totalPoints || 0;
-  const active  = getActiveChallengeCount(gs);
-  const best    = getBestStreak(gs);
 
-  setTextContent('total-points-display',       points.toLocaleString('en-IN'));
+/**
+ * Updates the streak display, completed challenge counts, and total points in the UI.
+ */
+function renderPointsSummary() {
+  const gs = AppState.gamification;
+  const points = gs.totalPoints || 0;
+  const active = getActiveChallengeCount(gs);
+  const best = getBestStreak(gs);
+
+  setTextContent('total-points-display', points.toLocaleString('en-IN'));
   setTextContent('challenges-completed-display', active);
-  setTextContent('best-streak-display',         `${best}${getStreakEmoji(best)}`);
+  setTextContent('best-streak-display', `${best}${getStreakEmoji(best)}`);
 }
 
+/**
+ * Dynamically renders challenge grid cards indicating active, locked, or completed challenges.
+ */
 function renderChallenges() {
-  const gs   = AppState.gamification;
+  const gs = AppState.gamification;
   const grid = document.getElementById('challenges-grid');
   if (!grid) return;
 
   grid.innerHTML = CHALLENGES.map(ch => {
     const cs = gs.challenges?.[ch.id] ?? {};
-    const streak      = cs.streak ?? 0;
-    const active      = cs.active ?? false;
-    const completed   = cs.completed ?? false;
-    const broken      = active && isStreakBroken(cs.lastCheckIn);
-    const dots        = getStreakDots(streak, ch.duration);
+    const streak = cs.streak ?? 0;
+    const active = cs.active ?? false;
+    const completed = cs.completed ?? false;
+    const broken = active && isStreakBroken(cs.lastCheckIn);
+    const dots = getStreakDots(streak, ch.duration);
     const streakEmoji = getStreakEmoji(streak);
-    const lastCI      = cs.lastCheckIn;
-    const today       = new Date().toISOString().split('T')[0];
-    const checkedIn   = lastCI === today;
+    const lastCI = cs.lastCheckIn;
+    const today = new Date().toISOString().split('T')[0];
+    const checkedIn = lastCI === today;
 
     const statusClass = completed ? 'completed' : active ? 'active' : '';
 
@@ -599,8 +653,11 @@ function renderChallenges() {
   }).join('');
 }
 
+/**
+ * Renders badges with unlock/locked styling indications.
+ */
 function renderBadges() {
-  const gs    = AppState.gamification;
+  const gs = AppState.gamification;
   const shelf = document.getElementById('badge-shelf');
   if (!shelf) return;
 
@@ -618,10 +675,13 @@ function renderBadges() {
   }).join('');
 }
 
+/**
+ * Renders community leaderboard sorting anonymous entries alongside user's rank.
+ */
 function renderLeaderboard() {
-  const gs    = AppState.gamification;
+  const gs = AppState.gamification;
   const board = getLeaderboard(gs, gs.userName || 'You');
-  const body  = document.getElementById('leaderboard-body');
+  const body = document.getElementById('leaderboard-body');
   if (!body) return;
 
   const rankStyle = { 1: 'gold', 2: 'silver', 3: 'bronze' };
@@ -654,6 +714,10 @@ function renderLeaderboard() {
 }
 
 // ─── ROADMAP ──────────────────────────────────────────────────────────────────
+
+/**
+ * Renders the personalized 5-step emission-saving roadmap.
+ */
 function renderRoadmap() {
   const results = AppState.results;
   const stepsEl = document.getElementById('roadmap-steps');
@@ -694,6 +758,10 @@ function renderRoadmap() {
 }
 
 // ─── SHARE UI ─────────────────────────────────────────────────────────────────
+
+/**
+ * Configures event listeners, pre-filled fields, and options for card sharing.
+ */
 function renderShareSection() {
   const results = AppState.results;
 
@@ -701,11 +769,11 @@ function renderShareSection() {
   const shareTextEl = document.getElementById('share-text-preview');
   if (shareTextEl && results) {
     const text = generateShareText({
-      totalKg:  results.totalKg,
-      tier:     results.tier,
+      totalKg: results.totalKg,
+      tier: results.tier,
       analogies: results.analogies,
       userName: document.getElementById('share-name-input')?.value || 'A CarbonMirror User',
-      pledge:   document.getElementById('share-pledge')?.value || '',
+      pledge: document.getElementById('share-pledge')?.value || '',
     });
     shareTextEl.textContent = text;
   }
@@ -723,6 +791,9 @@ function renderShareSection() {
   if (results) setTimeout(generateAndPreviewCard, 200);
 }
 
+/**
+ * Generates and draws the social share card layout on an HTML5 canvas.
+ */
 async function generateAndPreviewCard() {
   const canvas = document.getElementById('share-canvas');
   if (!canvas) return;
@@ -733,13 +804,13 @@ async function generateAndPreviewCard() {
     return;
   }
 
-  const format   = document.getElementById('share-format')?.value ?? 'linkedin';
+  const format = document.getElementById('share-format')?.value ?? 'linkedin';
   const userName = sanitizeInput(document.getElementById('share-name-input')?.value || '');
-  const pledge   = document.getElementById('share-pledge')?.value || '';
+  const pledge = document.getElementById('share-pledge')?.value || '';
 
   const data = {
-    totalKg:  results.totalKg,
-    tier:     results.tier,
+    totalKg: results.totalKg,
+    tier: results.tier,
     analogies: results.analogies,
     userName,
     pledge,
@@ -748,29 +819,30 @@ async function generateAndPreviewCard() {
   try {
     await generateShareCard(canvas, data, format);
 
-    // Update share text preview
     const shareText = generateShareText(data);
-    const preview   = document.getElementById('share-text-preview');
+    const preview = document.getElementById('share-text-preview');
     if (preview) preview.textContent = shareText;
 
     showToast('🎨 Card generated!', 'success');
   } catch (err) {
     showToast('Card generation failed. Try again.', 'error');
-    console.error('[CarbonMirror] Share card error:', err);
   }
 }
 
+/**
+ * Calls navigator.share sheet to share canvas card image.
+ */
 async function handleNativeShare() {
-  const canvas  = document.getElementById('share-canvas');
+  const canvas = document.getElementById('share-canvas');
   const results = AppState.results;
   if (!results || !canvas) { showToast('Generate your card first!', 'error'); return; }
 
   const shareText = generateShareText({
-    totalKg:  results.totalKg,
-    tier:     results.tier,
+    totalKg: results.totalKg,
+    tier: results.tier,
     analogies: results.analogies,
     userName: document.getElementById('share-name-input')?.value || '',
-    pledge:   document.getElementById('share-pledge')?.value || '',
+    pledge: document.getElementById('share-pledge')?.value || '',
   });
 
   try {
@@ -778,7 +850,6 @@ async function handleNativeShare() {
     if (result.method !== 'aborted') {
       AppState.gamification = markShared(AppState.gamification);
       showToast('📣 Shared! You earned the Pledge Maker badge!', 'success');
-      // Re-render badges
       if (AppState.currentSection === 'challenges') renderBadges();
     }
   } catch (err) {
@@ -786,6 +857,9 @@ async function handleNativeShare() {
   }
 }
 
+/**
+ * Copies the pre-filled social share card text to clipboard.
+ */
 async function copyShareText() {
   const text = document.getElementById('share-text-preview')?.textContent;
   if (!text) return;
@@ -798,16 +872,19 @@ async function copyShareText() {
 }
 
 // ─── API KEY UI ───────────────────────────────────────────────────────────────
-function initApiKeyUI() {
-  const input     = document.getElementById('api-key-input');
-  const saveBtn   = document.getElementById('api-key-save-btn');
-  const clearBtn  = document.getElementById('api-key-clear-btn');
-  const statusEl  = document.getElementById('api-key-status');
 
-  // Show existing key if any
+/**
+ * Wires listeners, saving, clearing, and indicators for the user-supplied Gemini key.
+ */
+function initApiKeyUI() {
+  const input = document.getElementById('api-key-input');
+  const saveBtn = document.getElementById('api-key-save-btn');
+  const clearBtn = document.getElementById('api-key-clear-btn');
+  const statusEl = document.getElementById('api-key-status');
+
   if (hasApiKey()) {
-    if (input)    { input.value = ''; input.placeholder = getMaskedKey(); }
-    if (saveBtn)  saveBtn.classList.add('hidden');
+    if (input) { input.value = ''; input.placeholder = getMaskedKey(); }
+    if (saveBtn) saveBtn.classList.add('hidden');
     if (clearBtn) clearBtn.classList.remove('hidden');
     if (statusEl) { statusEl.textContent = '✅ Gemini API key active'; statusEl.style.color = 'var(--color-green-tier)'; }
   }
@@ -816,8 +893,8 @@ function initApiKeyUI() {
     const key = input?.value?.trim();
     if (!key) { showToast('Please enter an API key.', 'error'); return; }
     if (saveApiKey(key)) {
-      if (input)    { input.value = ''; input.placeholder = getMaskedKey(); }
-      if (saveBtn)  saveBtn.classList.add('hidden');
+      if (input) { input.value = ''; input.placeholder = getMaskedKey(); }
+      if (saveBtn) saveBtn.classList.add('hidden');
       if (clearBtn) clearBtn.classList.remove('hidden');
       if (statusEl) { statusEl.textContent = '✅ API key saved (session only)'; statusEl.style.color = 'var(--color-green-tier)'; }
       showToast('✨ Gemini API key saved! AI nudges enabled.', 'success');
@@ -828,8 +905,8 @@ function initApiKeyUI() {
 
   clearBtn?.addEventListener('click', () => {
     clearApiKey();
-    if (input)    { input.value = ''; input.placeholder = 'AIza… (paste your Gemini API key here)'; }
-    if (saveBtn)  saveBtn.classList.remove('hidden');
+    if (input) { input.value = ''; input.placeholder = 'AIza… (paste your Gemini API key here)'; }
+    if (saveBtn) saveBtn.classList.remove('hidden');
     if (clearBtn) clearBtn.classList.add('hidden');
     if (statusEl) { statusEl.textContent = ''; }
     showToast('API key cleared. Using rule-based mode.', 'info');
@@ -847,7 +924,7 @@ window.CarbonMirror.joinChallenge = (id) => {
 };
 
 window.CarbonMirror.challengeCheckIn = (id) => {
-  const { state: newState, message, pointsEarned, newBadges, streakBroken } = dailyCheckIn(id, AppState.gamification);
+  const { state: newState, message, newBadges, streakBroken } = dailyCheckIn(id, AppState.gamification);
   AppState.gamification = newState;
   showToast(message, streakBroken ? 'error' : 'success');
 
@@ -873,8 +950,11 @@ window.CarbonMirror.abandonChallenge = (id) => {
 };
 
 // ─── NAV ─────────────────────────────────────────────────────────────────────
+
+/**
+ * Initializes navbar event listeners, mobile hamburger toggle, and scroll shading.
+ */
 function initNav() {
-  // Hash links
   document.querySelectorAll('.nav__link[data-section]').forEach(link => {
     link.addEventListener('click', e => {
       e.preventDefault();
@@ -882,21 +962,18 @@ function initNav() {
     });
   });
 
-  // Hamburger
   const hamburger = document.getElementById('nav-hamburger');
-  const navLinks  = document.getElementById('nav-links');
+  const navLinks = document.getElementById('nav-links');
   hamburger?.addEventListener('click', () => {
     const open = navLinks.classList.toggle('open');
     hamburger.setAttribute('aria-expanded', String(open));
   });
 
-  // Scrolled class for nav
   window.addEventListener('scroll', () => {
     const nav = document.querySelector('.nav');
     if (nav) nav.classList.toggle('scrolled', window.scrollY > 20);
   }, { passive: true });
 
-  // Close mobile nav on outside click
   document.addEventListener('click', e => {
     if (!e.target.closest('.nav')) {
       navLinks?.classList.remove('open');
@@ -906,6 +983,12 @@ function initNav() {
 }
 
 // ─── TOAST ───────────────────────────────────────────────────────────────────
+
+/**
+ * Spawns an animated, accessible bottom-right toast notification.
+ * @param {string} message - Notification text content.
+ * @param {string} [type] - Semantic type ('success', 'error', 'info', 'badge').
+ */
 function showToast(message, type = 'info') {
   const container = document.getElementById('toast-container');
   if (!container) return;
@@ -929,6 +1012,10 @@ function showToast(message, type = 'info') {
 }
 
 // ─── HERO PARTICLES ──────────────────────────────────────────────────────────
+
+/**
+ * Populates floating atmospheric green micro-particles behind the main hero heading.
+ */
 function initHeroParticles() {
   if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
 
@@ -942,11 +1029,11 @@ function initHeroParticles() {
   for (let i = 0; i < 20; i++) {
     const particle = document.createElement('div');
     const size = Math.random() * 6 + 3;
-    const x    = Math.random() * 100;
+    const x = Math.random() * 100;
     const delay = Math.random() * 4;
-    const dur   = 4 + Math.random() * 4;
-    const dx    = (Math.random() - 0.5) * 150;
-    const dy    = -(100 + Math.random() * 200);
+    const dur = 4 + Math.random() * 4;
+    const dx = (Math.random() - 0.5) * 150;
+    const dy = -(100 + Math.random() * 200);
 
     particle.style.cssText = `
       position: absolute;
@@ -963,15 +1050,31 @@ function initHeroParticles() {
 }
 
 // ─── UTILITIES ───────────────────────────────────────────────────────────────
+
+/**
+ * Standardized DOM text utility.
+ * @param {string} id - Target DOM element ID.
+ * @param {string} text - Desired text content.
+ */
 function setTextContent(id, text) {
   const el = document.getElementById(id);
   if (el) el.textContent = text;
 }
 
+/**
+ * Capitalizes the first letter of a string.
+ * @param {string} str - Target string.
+ * @returns {string} Capitalized output string.
+ */
 function capitalize(str) {
   return str.charAt(0).toUpperCase() + str.slice(1);
 }
 
+/**
+ * Escapes special HTML characters to prevent XSS injection.
+ * @param {string} str - Raw input string.
+ * @returns {string} Sanitized safe string.
+ */
 function escapeHtml(str) {
   if (typeof str !== 'string') return '';
   return str
@@ -982,17 +1085,27 @@ function escapeHtml(str) {
     .replace(/'/g, '&#x27;');
 }
 
+/**
+ * Returns hex color code assigned to different carbon categories.
+ * @param {string} label - Category label.
+ * @returns {string} Hex color string.
+ */
 function getCategoryColor(label) {
   const colors = {
-    Transport:   '#2980B9',
-    Food:        '#27AE60',
+    Transport: '#2980B9',
+    Food: '#27AE60',
     'Home Energy': '#E67E22',
-    Shopping:    '#8E44AD',
-    Digital:     '#1B4332',
+    Shopping: '#8E44AD',
+    Digital: '#1B4332',
   };
   return colors[label] ?? '#27AE60';
 }
 
+/**
+ * Generates gradients for leaderboard profile avatars based on ID characters.
+ * @param {string} id - Profile ID string.
+ * @returns {string} CSS gradient color-stop string.
+ */
 function avatarColor(id) {
   const colors = [
     '#1B4332, #27AE60', '#0D47A1, #2196F3', '#4A148C, #9C27B0',
@@ -1003,6 +1116,13 @@ function avatarColor(id) {
   return colors[hash % colors.length];
 }
 
+/**
+ * Interpolates numbers smoothly with a cubic ease-out algorithm for score animations.
+ * @param {HTMLElement} el - Target DOM element.
+ * @param {number} from - Starting value.
+ * @param {number} to - End value.
+ * @param {number} duration - Animation duration in ms.
+ */
 function animateNumber(el, from, to, duration) {
   const start = performance.now();
   const update = (now) => {
@@ -1016,6 +1136,10 @@ function animateNumber(el, from, to, duration) {
 }
 
 // ─── BOOTSTRAP ────────────────────────────────────────────────────────────────
+
+/**
+ * Primary initialization wrapper executing routing, navigation, and particle scripts.
+ */
 function init() {
   initNav();
   initCalculator();
@@ -1024,14 +1148,10 @@ function init() {
   initRouting();
   initHeroParticles();
 
-  // Show home section properly
   const homeSection = document.getElementById('section-home');
   if (homeSection) homeSection.style.display = 'flex';
-
-  console.info('[CarbonMirror] 🌍 App initialized. All modules loaded.');
 }
 
-// Wait for DOM
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', init);
 } else {
