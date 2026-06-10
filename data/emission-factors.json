@@ -1,0 +1,463 @@
+{
+  "schemaVersion": "1.0",
+  "lastUpdated": "2024-01",
+  "sources": [
+    "IEA India Energy Outlook 2023",
+    "IPCC AR6 Working Group III (2022)",
+    "Ministry of Petroleum & Natural Gas, India",
+    "DMRC (Delhi Metro Rail Corporation) GHG Reports",
+    "Indian Railways GHG Inventory",
+    "Ministry of Road Transport and Highways (MoRTH)",
+    "GHG Protocol Corporate Standard",
+    "Carbon Trust / IEA Digital Emissions",
+    "ICAO Carbon Emissions Calculator (DGCA data)",
+    "Uptime Institute PUE Reports 2023",
+    "Textile Exchange Fiber & Materials Benchmark 2022"
+  ],
+  "units": {
+    "transport": "kg CO2 per km (per passenger km for shared modes)",
+    "food": "kg CO2 per kg of food item (or per unit as noted)",
+    "energy": "kg CO2 per kWh or per kg of fuel",
+    "shopping": "kg CO2 per item (lifecycle assessment)",
+    "digital": "kg CO2 per hour or per GB"
+  },
+  "transport": {
+    "petrol_car": {
+      "factor": 0.192,
+      "unit": "kg_co2_per_km",
+      "label": "Petrol Car",
+      "icon": "🚗",
+      "source": "MoPNG + IEA 2023"
+    },
+    "diesel_car": {
+      "factor": 0.171,
+      "unit": "kg_co2_per_km",
+      "label": "Diesel Car",
+      "icon": "🚙",
+      "source": "MoPNG India"
+    },
+    "cng_car": {
+      "factor": 0.131,
+      "unit": "kg_co2_per_km",
+      "label": "CNG Car",
+      "icon": "🚘",
+      "source": "IEA 2023"
+    },
+    "motorcycle": {
+      "factor": 0.103,
+      "unit": "kg_co2_per_km",
+      "label": "Motorcycle / Scooter",
+      "icon": "🛵",
+      "source": "MoPNG India"
+    },
+    "ev_car": {
+      "factor": 0.088,
+      "unit": "kg_co2_per_km",
+      "label": "Electric Car (India grid)",
+      "icon": "⚡",
+      "source": "IEA 2023 (0.708 kgCO2/kWh × 8kWh/100km)"
+    },
+    "metro": {
+      "factor": 0.041,
+      "unit": "kg_co2_per_pkm",
+      "label": "Metro / Suburban Rail",
+      "icon": "🚇",
+      "source": "DMRC GHG Report 2022"
+    },
+    "city_bus": {
+      "factor": 0.089,
+      "unit": "kg_co2_per_pkm",
+      "label": "City Bus",
+      "icon": "🚌",
+      "source": "MoRTH India"
+    },
+    "auto_rickshaw": {
+      "factor": 0.076,
+      "unit": "kg_co2_per_km",
+      "label": "Auto-Rickshaw (CNG)",
+      "icon": "🛺",
+      "source": "IEA 2023"
+    },
+    "domestic_flight": {
+      "factor": 0.255,
+      "unit": "kg_co2_per_km",
+      "label": "Domestic Flight",
+      "icon": "✈️",
+      "source": "ICAO / DGCA India"
+    },
+    "train_ir": {
+      "factor": 0.012,
+      "unit": "kg_co2_per_pkm",
+      "label": "Indian Railways (train)",
+      "icon": "🚂",
+      "source": "Indian Railways GHG Inventory 2022"
+    },
+    "cab_petrol": {
+      "factor": 0.192,
+      "unit": "kg_co2_per_km",
+      "label": "Cab / Taxi (Petrol)",
+      "icon": "🚖",
+      "source": "MoPNG (same as petrol car, single occupancy)"
+    },
+    "bicycle": {
+      "factor": 0.0,
+      "unit": "kg_co2_per_km",
+      "label": "Bicycle / Walking",
+      "icon": "🚲",
+      "source": "Zero direct emissions"
+    }
+  },
+  "food": {
+    "beef_mutton": {
+      "factor": 39.2,
+      "unit": "kg_co2_per_kg",
+      "label": "Red Meat (Mutton / Beef)",
+      "icon": "🥩",
+      "source": "IPCC AR6 WG3 Ch12"
+    },
+    "chicken": {
+      "factor": 9.9,
+      "unit": "kg_co2_per_kg",
+      "label": "Chicken / Poultry",
+      "icon": "🍗",
+      "source": "IPCC AR6 WG3"
+    },
+    "fish": {
+      "factor": 6.1,
+      "unit": "kg_co2_per_kg",
+      "label": "Fish / Seafood",
+      "icon": "🐟",
+      "source": "IPCC AR6 WG3"
+    },
+    "eggs": {
+      "factor": 0.375,
+      "unit": "kg_co2_per_egg",
+      "label": "Eggs",
+      "icon": "🥚",
+      "source": "IPCC AR6 (4.5 kg/dozen)"
+    },
+    "milk_dairy": {
+      "factor": 3.2,
+      "unit": "kg_co2_per_litre",
+      "label": "Dairy (Milk / Paneer / Curd)",
+      "icon": "🥛",
+      "source": "IPCC AR6 WG3"
+    },
+    "rice": {
+      "factor": 2.7,
+      "unit": "kg_co2_per_kg",
+      "label": "Rice",
+      "icon": "🍚",
+      "source": "IPCC AR6 + Indian paddy methane factor"
+    },
+    "wheat_roti": {
+      "factor": 0.9,
+      "unit": "kg_co2_per_kg",
+      "label": "Wheat / Roti / Bread",
+      "icon": "🫓",
+      "source": "IPCC AR6 WG3"
+    },
+    "pulses_dal": {
+      "factor": 1.1,
+      "unit": "kg_co2_per_kg",
+      "label": "Pulses / Dal / Legumes",
+      "icon": "🫘",
+      "source": "IPCC AR6 WG3"
+    },
+    "vegetables": {
+      "factor": 0.4,
+      "unit": "kg_co2_per_kg",
+      "label": "Vegetables",
+      "icon": "🥦",
+      "source": "IPCC AR6 WG3"
+    },
+    "fruits": {
+      "factor": 0.6,
+      "unit": "kg_co2_per_kg",
+      "label": "Fruits",
+      "icon": "🍎",
+      "source": "IPCC AR6 WG3"
+    },
+    "packaged_snacks": {
+      "factor": 3.5,
+      "unit": "kg_co2_per_kg",
+      "label": "Packaged / Processed Snacks",
+      "icon": "🍫",
+      "source": "GHG Protocol food sector estimate"
+    },
+    "food_delivery_logistics": {
+      "factor": 0.4,
+      "unit": "kg_co2_per_order",
+      "label": "Food Delivery Logistics (Swiggy/Zomato)",
+      "icon": "🛵",
+      "source": "Estimated: 5km avg last-mile × 0.076 CNG + packaging"
+    },
+    "restaurant_meal": {
+      "factor": 2.5,
+      "unit": "kg_co2_per_meal",
+      "label": "Restaurant Meal (average)",
+      "icon": "🍽️",
+      "source": "Estimated lifecycle average"
+    }
+  },
+  "energy": {
+    "grid_electricity": {
+      "factor": 0.708,
+      "unit": "kg_co2_per_kwh",
+      "label": "Grid Electricity (India national avg)",
+      "icon": "⚡",
+      "source": "IEA 2023 India emission intensity"
+    },
+    "lpg_cooking": {
+      "factor": 2.983,
+      "unit": "kg_co2_per_kg_lpg",
+      "label": "LPG Cooking Gas",
+      "icon": "🔥",
+      "source": "IPCC (1 cylinder = 14.2 kg LPG)"
+    },
+    "lpg_per_cylinder": {
+      "factor": 42.36,
+      "unit": "kg_co2_per_cylinder",
+      "label": "LPG Cylinder (14.2 kg)",
+      "icon": "🔥",
+      "source": "IPCC (14.2 kg × 2.983 = 42.36 kg CO2)"
+    },
+    "png_cooking": {
+      "factor": 2.204,
+      "unit": "kg_co2_per_kg_gas",
+      "label": "PNG (Piped Natural Gas)",
+      "icon": "🔵",
+      "source": "IEA 2023"
+    },
+    "ac_1_5ton": {
+      "factor": 1.062,
+      "unit": "kg_co2_per_hour",
+      "label": "Air Conditioner (1.5 Ton)",
+      "icon": "❄️",
+      "source": "IEA (1.5 kW × 0.708 kgCO2/kWh)"
+    },
+    "ac_2ton": {
+      "factor": 1.416,
+      "unit": "kg_co2_per_hour",
+      "label": "Air Conditioner (2 Ton)",
+      "icon": "❄️",
+      "source": "IEA (2.0 kW × 0.708)"
+    },
+    "ceiling_fan": {
+      "factor": 0.053,
+      "unit": "kg_co2_per_hour",
+      "label": "Ceiling Fan",
+      "icon": "💨",
+      "source": "IEA (0.075 kW × 0.708)"
+    },
+    "refrigerator": {
+      "factor": 0.142,
+      "unit": "kg_co2_per_hour",
+      "label": "Refrigerator",
+      "icon": "🧊",
+      "source": "IEA (0.2 kW avg × 0.708)"
+    },
+    "geyser_water_heater": {
+      "factor": 1.416,
+      "unit": "kg_co2_per_hour",
+      "label": "Electric Geyser / Water Heater",
+      "icon": "🚿",
+      "source": "IEA (2.0 kW × 0.708)"
+    },
+    "solar_panels": {
+      "factor": -0.05,
+      "unit": "kg_co2_per_kwh",
+      "label": "Solar Panels (offset)",
+      "icon": "☀️",
+      "source": "Lifecycle net offset estimate, India conditions"
+    }
+  },
+  "shopping": {
+    "smartphone": {
+      "factor": 70,
+      "unit": "kg_co2_per_device",
+      "label": "New Smartphone",
+      "icon": "📱",
+      "source": "Apple/Samsung LCA average"
+    },
+    "laptop": {
+      "factor": 350,
+      "unit": "kg_co2_per_device",
+      "label": "New Laptop / PC",
+      "icon": "💻",
+      "source": "Dell/Lenovo LCA data"
+    },
+    "tablet": {
+      "factor": 110,
+      "unit": "kg_co2_per_device",
+      "label": "New Tablet",
+      "icon": "📟",
+      "source": "Apple iPad LCA"
+    },
+    "television_40": {
+      "factor": 225,
+      "unit": "kg_co2_per_device",
+      "label": "New Television (40-inch LED)",
+      "icon": "📺",
+      "source": "GHG Protocol electronics LCA"
+    },
+    "fast_fashion_tshirt": {
+      "factor": 10,
+      "unit": "kg_co2_per_garment",
+      "label": "New T-Shirt / Fast Fashion",
+      "icon": "👕",
+      "source": "Textile Exchange 2022"
+    },
+    "jeans": {
+      "factor": 33.4,
+      "unit": "kg_co2_per_garment",
+      "label": "New Jeans / Denim",
+      "icon": "👖",
+      "source": "Textile Exchange 2022"
+    },
+    "sneakers": {
+      "factor": 14,
+      "unit": "kg_co2_per_pair",
+      "label": "New Sneakers / Shoes",
+      "icon": "👟",
+      "source": "Carbon Trust footwear LCA"
+    },
+    "online_order_packaging": {
+      "factor": 0.5,
+      "unit": "kg_co2_per_parcel",
+      "label": "Online Order Packaging",
+      "icon": "📦",
+      "source": "Estimated: cardboard + last-mile delivery"
+    },
+    "furniture_piece": {
+      "factor": 90,
+      "unit": "kg_co2_per_item",
+      "label": "Furniture Piece (e.g., chair, table)",
+      "icon": "🪑",
+      "source": "GHG Protocol materials LCA estimate"
+    },
+    "appliance_small": {
+      "factor": 50,
+      "unit": "kg_co2_per_item",
+      "label": "Small Appliance (mixer, iron, etc.)",
+      "icon": "🔌",
+      "source": "GHG Protocol electronics estimate"
+    }
+  },
+  "digital": {
+    "video_streaming_hd": {
+      "factor": 0.036,
+      "unit": "kg_co2_per_hour",
+      "label": "Video Streaming (HD — Netflix/YouTube)",
+      "icon": "📺",
+      "source": "IEA / Carbon Trust 2022"
+    },
+    "video_streaming_4k": {
+      "factor": 0.072,
+      "unit": "kg_co2_per_hour",
+      "label": "Video Streaming (4K)",
+      "icon": "🎬",
+      "source": "IEA / Carbon Trust 2022"
+    },
+    "social_media": {
+      "factor": 0.015,
+      "unit": "kg_co2_per_hour",
+      "label": "Social Media Browsing",
+      "icon": "📲",
+      "source": "Estimated: avg data transfer × IEA network factor"
+    },
+    "video_call": {
+      "factor": 0.157,
+      "unit": "kg_co2_per_hour",
+      "label": "Video Call (Zoom/Meet/Teams)",
+      "icon": "📹",
+      "source": "Carbon Trust / IEA 2022"
+    },
+    "email_with_attachment": {
+      "factor": 0.05,
+      "unit": "kg_co2_per_email",
+      "label": "Email with Attachment (avg 1MB)",
+      "icon": "📧",
+      "source": "OXO / Carbon Trust"
+    },
+    "email_plain": {
+      "factor": 0.004,
+      "unit": "kg_co2_per_email",
+      "label": "Plain Text Email",
+      "icon": "✉️",
+      "source": "OXO / Carbon Trust"
+    },
+    "cloud_storage": {
+      "factor": 0.003,
+      "unit": "kg_co2_per_gb_month",
+      "label": "Cloud Storage (per GB/month)",
+      "icon": "☁️",
+      "source": "Uptime Institute PUE 2023"
+    },
+    "music_streaming": {
+      "factor": 0.013,
+      "unit": "kg_co2_per_hour",
+      "label": "Music Streaming (Spotify/Gaana)",
+      "icon": "🎵",
+      "source": "Spotify Sustainability Report 2022"
+    },
+    "online_gaming": {
+      "factor": 0.08,
+      "unit": "kg_co2_per_hour",
+      "label": "Online Gaming",
+      "icon": "🎮",
+      "source": "IEA data center + device estimate"
+    },
+    "ai_prompt": {
+      "factor": 0.002,
+      "unit": "kg_co2_per_query",
+      "label": "AI Chatbot Query",
+      "icon": "🤖",
+      "source": "Goldman Sachs AI Energy Report 2024 estimate"
+    }
+  },
+  "analogies": {
+    "delhi_mumbai_km": 1450,
+    "tree_absorption_kg_per_year": 21,
+    "avg_indian_household_kwh_per_month": 96,
+    "avg_indian_household_co2_per_month": 67.97,
+    "domestic_flight_avg_km": 800,
+    "mumbai_pune_km": 148,
+    "delhi_jaipur_km": 280,
+    "olympic_swimming_pool_co2_kg": 8000,
+    "india_per_capita_avg_kg_co2": 1900,
+    "global_per_capita_avg_kg_co2": 4700
+  },
+  "tiers": {
+    "green": {
+      "max_kg": 1500,
+      "label": "Carbon Champion",
+      "color": "#27AE60",
+      "description": "Significantly below India's average. You're a climate leader!",
+      "icon": "🌱"
+    },
+    "yellow": {
+      "min_kg": 1500,
+      "max_kg": 3000,
+      "label": "Average Citizen",
+      "color": "#F39C12",
+      "description": "Around India's average. Small changes can make a big difference.",
+      "icon": "🌤️"
+    },
+    "orange": {
+      "min_kg": 3000,
+      "max_kg": 6000,
+      "label": "Heavy Footprint",
+      "color": "#E67E22",
+      "description": "Above India's average. Consider switching to sustainable alternatives.",
+      "icon": "⚠️"
+    },
+    "red": {
+      "min_kg": 6000,
+      "label": "Climate Emergency",
+      "color": "#C0392B",
+      "description": "Well above sustainable levels. Urgent action needed.",
+      "icon": "🔴"
+    }
+  }
+}
