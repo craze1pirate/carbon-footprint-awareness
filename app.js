@@ -16,7 +16,7 @@ import {
 } from './visualization.js';
 
 import {
-  analyzeAction, hasApiKey, getMaskedKey, sanitizeInput,
+  analyzeAction, saveApiKey, clearApiKey, hasApiKey, getMaskedKey, sanitizeInput,
 } from './nudge-engine.js';
 
 import {
@@ -175,9 +175,11 @@ function initCalculator() {
   const vehicleSelect = document.getElementById('transport-vehicle');
   const vehicleKmGroup = document.getElementById('vehicle-km-group');
   if (vehicleSelect && vehicleKmGroup) {
-    vehicleSelect.addEventListener('change', () => {
+    const toggleVehicleKm = () => {
       vehicleKmGroup.style.display = vehicleSelect.value === 'none' ? 'none' : 'flex';
-    });
+    };
+    vehicleSelect.addEventListener('change', toggleVehicleKm);
+    toggleVehicleKm(); // Runs on page load to hide distance initially
   }
 
   // Toggle flight distance group based on flight count
@@ -188,7 +190,7 @@ function initCalculator() {
       flightDistGroup.style.display = Number(flightInput.value) === 0 ? 'none' : 'flex';
     };
     flightInput.addEventListener('input', toggleFlightDist);
-    toggleFlightDist();
+    toggleFlightDist(); // Runs on page load to hide distance initially
   }
 
   // Toggle public transit distance and mode groups based on usage selection
@@ -202,7 +204,7 @@ function initCalculator() {
       publicTypeGroup.style.display = hasTransit ? 'flex' : 'none';
     };
     publicDaysSelect.addEventListener('change', togglePublicTransit);
-    togglePublicTransit();
+    togglePublicTransit(); // Runs on page load to hide transit initially
   }
 
   // Calculate button

@@ -1138,9 +1138,19 @@
 
   .nudge-input-group {
     display: flex;
-    align-items: flex-end;
+    align-items: center;
+    /* Center-aligns their vertical axes */
     gap: var(--space-3);
     margin-bottom: var(--space-6);
+  }
+
+  #nudge-scan-btn {
+    height: 56px;
+    /* Matches the minimum height of the textarea exactly */
+    border-radius: var(--radius-xl);
+    /* Matches the textarea's rounded corners */
+    padding: 0 var(--space-6);
+    /* Symmetrical horizontal padding */
   }
 
   .nudge-textarea {
