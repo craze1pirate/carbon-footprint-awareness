@@ -180,6 +180,31 @@ function initCalculator() {
     });
   }
 
+  // Toggle flight distance group based on flight count
+  const flightInput = document.getElementById('transport-flights');
+  const flightDistGroup = document.getElementById('transport-flight-distance')?.parentElement;
+  if (flightInput && flightDistGroup) {
+    const toggleFlightDist = () => {
+      flightDistGroup.style.display = Number(flightInput.value) === 0 ? 'none' : 'flex';
+    };
+    flightInput.addEventListener('input', toggleFlightDist);
+    toggleFlightDist();
+  }
+
+  // Toggle public transit distance and mode groups based on usage selection
+  const publicDaysSelect = document.getElementById('transport-public-days');
+  const publicKmGroup = document.getElementById('transport-public-km')?.parentElement;
+  const publicTypeGroup = document.getElementById('transport-public-type')?.parentElement;
+  if (publicDaysSelect && publicKmGroup && publicTypeGroup) {
+    const togglePublicTransit = () => {
+      const hasTransit = publicDaysSelect.value !== '0';
+      publicKmGroup.style.display = hasTransit ? 'flex' : 'none';
+      publicTypeGroup.style.display = hasTransit ? 'flex' : 'none';
+    };
+    publicDaysSelect.addEventListener('change', togglePublicTransit);
+    togglePublicTransit();
+  }
+
   // Calculate button
   const calcBtn = document.getElementById('calculate-btn');
   if (calcBtn) calcBtn.addEventListener('click', runCalculation);

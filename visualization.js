@@ -309,7 +309,7 @@ async function initThreePlanet(canvasEl) {
     const h2 = canvasEl.clientHeight || 400;
     camera.aspect = w2 / h2;
     camera.updateProjectionMatrix();
-    renderer.setSize(w2, h2);
+    renderer.setSize(w2, h2, false);
   });
   resizeObs.observe(canvasEl.parentElement || canvasEl);
 
