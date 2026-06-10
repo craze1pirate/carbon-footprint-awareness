@@ -7,6 +7,11 @@
 // ─── FONT PRELOAD ────────────────────────────────────────────────────────────
 // Ensures Outfit is available before Canvas rendering
 let fontsLoaded = false;
+
+/**
+ * Preloads the custom brand typography (Outfit & Inter) prior to canvas rendering.
+ * @returns {Promise<void>}
+ */
 async function ensureFonts() {
   if (fontsLoaded) return;
   try {
@@ -22,64 +27,64 @@ async function ensureFonts() {
 // ─── TIER THEME MAP ──────────────────────────────────────────────────────────
 const TIER_THEMES = {
   green: {
-    bg:         ['#0D2B20', '#1B4332', '#2D6A4F'],
-    accent:     '#27AE60',
-    accentLight:'#52BE80',
-    tierLabel:  'Carbon Champion',
-    icon:       '🌱',
-    tagline:    'Significantly below India\'s average. You\'re leading the change.',
+    bg: ['#0D2B20', '#1B4332', '#2D6A4F'],
+    accent: '#27AE60',
+    accentLight: '#52BE80',
+    tierLabel: 'Carbon Champion',
+    icon: '🌱',
+    tagline: 'Significantly below India\'s average. You\'re leading the change.',
   },
   yellow: {
-    bg:         ['#2D2206', '#4A3800', '#6B5200'],
-    accent:     '#F39C12',
-    accentLight:'#F8C471',
-    tierLabel:  'Average Citizen',
-    icon:       '🌤️',
-    tagline:    'Around India\'s average. Small changes make a huge difference.',
+    bg: ['#2D2206', '#4A3800', '#6B5200'],
+    accent: '#F39C12',
+    accentLight: '#F8C471',
+    tierLabel: 'Average Citizen',
+    icon: '🌤️',
+    tagline: 'Around India\'s average. Small changes make a huge difference.',
   },
   orange: {
-    bg:         ['#2D0D00', '#4A2000', '#6B3510'],
-    accent:     '#E67E22',
-    accentLight:'#F0A060',
-    tierLabel:  'Heavy Footprint',
-    icon:       '⚠️',
-    tagline:    'Above India\'s average. Time to take action.',
+    bg: ['#2D0D00', '#4A2000', '#6B3510'],
+    accent: '#E67E22',
+    accentLight: '#F0A060',
+    tierLabel: 'Heavy Footprint',
+    icon: '⚠️',
+    tagline: 'Above India\'s average. Time to take action.',
   },
   red: {
-    bg:         ['#200505', '#3A0A0A', '#5C1515'],
-    accent:     '#C0392B',
-    accentLight:'#E74C3C',
-    tierLabel:  'Climate Emergency',
-    icon:       '🔴',
-    tagline:    'Urgent action needed. Every change counts.',
+    bg: ['#200505', '#3A0A0A', '#5C1515'],
+    accent: '#C0392B',
+    accentLight: '#E74C3C',
+    tierLabel: 'Climate Emergency',
+    icon: '🔴',
+    tagline: 'Urgent action needed. Every change counts.',
   },
 };
 
 // ─── PRESET DIMENSIONS ───────────────────────────────────────────────────────
 const PRESETS = {
-  linkedin:  { width: 1200, height: 628,  label: 'LinkedIn'  },
-  whatsapp:  { width: 1080, height: 1080, label: 'WhatsApp'  },
+  linkedin: { width: 1200, height: 628, label: 'LinkedIn' },
+  whatsapp: { width: 1080, height: 1080, label: 'WhatsApp' },
 };
 
 // ─── MAIN CARD GENERATOR ─────────────────────────────────────────────────────
 
 /**
  * Generate a share card on the given canvas.
- * @param {HTMLCanvasElement} canvas
- * @param {CardData} data
- * @param {'linkedin'|'whatsapp'} format
+ * @param {HTMLCanvasElement} canvas - Target Canvas.
+ * @param {CardData} data - Carbon result data payload.
+ * @param {'linkedin'|'whatsapp'} format - Dimension preset.
  */
 export async function generateShareCard(canvas, data, format = 'linkedin') {
   await ensureFonts();
 
   const preset = PRESETS[format] ?? PRESETS.linkedin;
-  canvas.width  = preset.width;
+  canvas.width = preset.width;
   canvas.height = preset.height;
 
-  const ctx   = canvas.getContext('2d');
+  const ctx = canvas.getContext('2d');
   const theme = TIER_THEMES[data.tier] ?? TIER_THEMES.green;
-  const W     = preset.width;
-  const H     = preset.height;
+  const W = preset.width;
+  const H = preset.height;
 
   // ── BACKGROUND ──
   const bgGrad = ctx.createLinearGradient(0, 0, W, H);
@@ -113,6 +118,14 @@ export async function generateShareCard(canvas, data, format = 'linkedin') {
 
 // ─── LINKEDIN LAYOUT (1200×628) ───────────────────────────────────────────────
 
+/**
+ * Draws the landscape 1200x628 layout tailored for LinkedIn.
+ * @param {CanvasRenderingContext2D} ctx - Canvas 2D context.
+ * @param {number} W - Canvas width.
+ * @param {number} H - Canvas height.
+ * @param {Object} theme - Tier style theme map.
+ * @param {CardData} data - Carbon result data payload.
+ */
 async function drawLinkedInLayout(ctx, W, H, theme, data) {
   const pad = 64;
 
@@ -123,8 +136,8 @@ async function drawLinkedInLayout(ctx, W, H, theme, data) {
 
   // ── Tier badge pill ──
   const tierText = `${theme.icon} ${theme.tierLabel}`;
-  const tierX    = pad;
-  const tierY    = pad + 36;
+  const tierX = pad;
+  const tierY = pad + 36;
   drawPill(ctx, tierX, tierY, tierText, theme.accent, 'rgba(0,0,0,0.4)', 18, 600);
 
   // ── Separator line left ──
@@ -132,7 +145,7 @@ async function drawLinkedInLayout(ctx, W, H, theme, data) {
   const lineY1 = tierY + 48;
   const lineY2 = H - pad;
   ctx.strokeStyle = hexToRgba(theme.accent, 0.4);
-  ctx.lineWidth   = 3;
+  ctx.lineWidth = 3;
   ctx.beginPath();
   ctx.moveTo(lineX, lineY1 + 20);
   ctx.lineTo(lineX, lineY2);
@@ -143,23 +156,23 @@ async function drawLinkedInLayout(ctx, W, H, theme, data) {
   const numY = H * 0.45;
 
   // "Your Annual Carbon Footprint" label
-  ctx.font      = '500 18px Inter, sans-serif';
+  ctx.font = '500 18px Inter, sans-serif';
   ctx.fillStyle = 'rgba(255,255,255,0.55)';
   ctx.fillText('YOUR ANNUAL CARBON FOOTPRINT', numX, numY - 100);
 
   // CO₂ number
   const kgFormatted = Math.round(data.totalKg).toLocaleString('en-IN');
-  ctx.font      = `900 ${W > 1000 ? 88 : 64}px Outfit, sans-serif`;
+  ctx.font = `900 ${W > 1000 ? 88 : 64}px Outfit, sans-serif`;
   ctx.fillStyle = theme.accentLight;
   ctx.fillText(kgFormatted, numX, numY);
 
   // Unit
-  ctx.font      = '400 28px Inter, sans-serif';
+  ctx.font = '400 28px Inter, sans-serif';
   ctx.fillStyle = 'rgba(255,255,255,0.7)';
   ctx.fillText('kg CO₂ per year', numX, numY + 44);
 
   // Tagline
-  ctx.font      = '400 20px Inter, sans-serif';
+  ctx.font = '400 20px Inter, sans-serif';
   ctx.fillStyle = 'rgba(255,255,255,0.55)';
   ctx.fillText(theme.tagline, numX, numY + 90);
 
@@ -167,26 +180,26 @@ async function drawLinkedInLayout(ctx, W, H, theme, data) {
   const rightX = W * 0.6;
   const rightY = H * 0.18;
 
-  ctx.font      = '600 18px Outfit, sans-serif';
+  ctx.font = '600 18px Outfit, sans-serif';
   ctx.fillStyle = 'rgba(255,255,255,0.7)';
   ctx.fillText('THAT\'S EQUIVALENT TO', rightX, rightY);
 
   const analogies = data.analogies;
   const items = [
-    { icon: '🚗', value: `${analogies.delhiMumbaiDrives}×`,     label: 'Delhi→Mumbai drives' },
-    { icon: '🌳', value: `${analogies.treesNeeded} trees`,        label: 'needed to offset' },
+    { icon: '🚗', value: `${analogies.delhiMumbaiDrives}×`, label: 'Delhi→Mumbai drives' },
+    { icon: '🌳', value: `${analogies.treesNeeded} trees`, label: 'needed to offset' },
     { icon: '⚡', value: `${analogies.electricityMonths} months`, label: 'household electricity' },
-    { icon: '✈️', value: `${analogies.domesticFlights}×`,         label: 'Delhi→Mumbai flights' },
+    { icon: '✈️', value: `${analogies.domesticFlights}×`, label: 'Delhi→Mumbai flights' },
   ];
 
   items.forEach((item, i) => {
-    const iy = rightY + 32 + i * (format === 'linkedin' ? 100 : 110);
-    drawAnalogyRow(ctx, rightX, iy, item.icon, item.value, item.label, theme.accentLight, W - rightX - pad);
+    const iy = rightY + 32 + i * 100;
+    drawAnalogyRow(ctx, rightX, iy, item.icon, item.value, item.label, theme.accentLight);
   });
 
   // ── USER NAME ──
   if (data.userName) {
-    ctx.font      = '700 20px Outfit, sans-serif';
+    ctx.font = '700 20px Outfit, sans-serif';
     ctx.fillStyle = 'rgba(255,255,255,0.85)';
     ctx.fillText(data.userName, pad + 26, H - pad - 40);
   }
@@ -194,7 +207,7 @@ async function drawLinkedInLayout(ctx, W, H, theme, data) {
   // ── PLEDGE ──
   if (data.pledge) {
     const pledgeY = H - pad - 10;
-    ctx.font      = '500 16px Inter, sans-serif';
+    ctx.font = '500 16px Inter, sans-serif';
     ctx.fillStyle = hexToRgba(theme.accentLight, 0.9);
     ctx.fillText(`"${data.pledge}"`, pad + 26, pledgeY);
   }
@@ -203,7 +216,7 @@ async function drawLinkedInLayout(ctx, W, H, theme, data) {
   drawPlanetDecoration(ctx, W - pad * 2.5, H * 0.5, Math.min(H * 0.28, 150), theme);
 
   // ── Branding bottom-right ──
-  ctx.font      = '500 14px Inter, sans-serif';
+  ctx.font = '500 14px Inter, sans-serif';
   ctx.fillStyle = 'rgba(255,255,255,0.35)';
   ctx.textAlign = 'right';
   ctx.fillText('carbomirror.app', W - pad, H - pad + 16);
@@ -212,12 +225,20 @@ async function drawLinkedInLayout(ctx, W, H, theme, data) {
 
 // ─── WHATSAPP LAYOUT (1080×1080) ─────────────────────────────────────────────
 
+/**
+ * Draws the square 1080x1080 layout tailored for WhatsApp.
+ * @param {CanvasRenderingContext2D} ctx - Canvas 2D context.
+ * @param {number} W - Canvas width.
+ * @param {number} H - Canvas height.
+ * @param {Object} theme - Tier style theme map.
+ * @param {CardData} data - Carbon result data payload.
+ */
 async function drawWhatsAppLayout(ctx, W, H, theme, data) {
   const pad = 72;
-  const cx  = W / 2;
+  const cx = W / 2;
 
   // ── LOGO ──
-  ctx.font      = '700 24px Outfit, sans-serif';
+  ctx.font = '700 24px Outfit, sans-serif';
   ctx.fillStyle = 'rgba(255,255,255,0.85)';
   ctx.textAlign = 'center';
   ctx.fillText('🌍 CarbonMirror', cx, pad);
@@ -232,17 +253,17 @@ async function drawWhatsAppLayout(ctx, W, H, theme, data) {
 
   // ── CO₂ number ──
   const kgFormatted = Math.round(data.totalKg).toLocaleString('en-IN');
-  ctx.font      = '900 96px Outfit, sans-serif';
+  ctx.font = '900 96px Outfit, sans-serif';
   ctx.fillStyle = theme.accentLight;
   ctx.fillText(kgFormatted, cx, H * 0.57);
 
-  ctx.font      = '400 24px Inter, sans-serif';
+  ctx.font = '400 24px Inter, sans-serif';
   ctx.fillStyle = 'rgba(255,255,255,0.65)';
   ctx.fillText('kg CO₂ per year', cx, H * 0.63);
 
   // ── Divider ──
   ctx.strokeStyle = hexToRgba(theme.accent, 0.3);
-  ctx.lineWidth   = 1.5;
+  ctx.lineWidth = 1.5;
   ctx.beginPath();
   ctx.moveTo(pad * 2, H * 0.67);
   ctx.lineTo(W - pad * 2, H * 0.67);
@@ -256,7 +277,7 @@ async function drawWhatsAppLayout(ctx, W, H, theme, data) {
     `✈️ ${analogies.domesticFlights}× domestic flights`,
   ];
 
-  ctx.font      = '500 20px Inter, sans-serif';
+  ctx.font = '500 20px Inter, sans-serif';
   ctx.fillStyle = 'rgba(255,255,255,0.75)';
   items.forEach((item, i) => {
     ctx.fillText(item, cx, H * 0.73 + i * 44);
@@ -264,20 +285,20 @@ async function drawWhatsAppLayout(ctx, W, H, theme, data) {
 
   // ── Pledge ──
   if (data.pledge) {
-    ctx.font      = '500 18px Outfit, sans-serif';
+    ctx.font = '500 18px Outfit, sans-serif';
     ctx.fillStyle = hexToRgba(theme.accentLight, 0.9);
     wrapText(ctx, `"${data.pledge}"`, cx, H * 0.87, W - pad * 3, 26);
   }
 
   // ── User name ──
   if (data.userName) {
-    ctx.font      = '700 20px Outfit, sans-serif';
+    ctx.font = '700 20px Outfit, sans-serif';
     ctx.fillStyle = 'rgba(255,255,255,0.8)';
     ctx.fillText(`— ${data.userName}`, cx, H - pad - 10);
   }
 
   // ── Branding ──
-  ctx.font      = '400 14px Inter, sans-serif';
+  ctx.font = '400 14px Inter, sans-serif';
   ctx.fillStyle = 'rgba(255,255,255,0.3)';
   ctx.fillText('carbomirror.app', cx, H - pad + 20);
 
@@ -286,10 +307,17 @@ async function drawWhatsAppLayout(ctx, W, H, theme, data) {
 
 // ─── DRAWING HELPERS ─────────────────────────────────────────────────────────
 
+/**
+ * Draws a subtle grid pattern on the canvas background.
+ * @param {CanvasRenderingContext2D} ctx - Canvas 2D context.
+ * @param {number} W - Canvas width.
+ * @param {number} H - Canvas height.
+ * @param {string} accentColor - Active hex accent color.
+ */
 function drawGrid(ctx, W, H, accentColor) {
   ctx.save();
   ctx.strokeStyle = hexToRgba(accentColor, 0.05);
-  ctx.lineWidth   = 1;
+  ctx.lineWidth = 1;
 
   const spacing = Math.min(W, H) * 0.06;
   for (let x = 0; x < W; x += spacing) {
@@ -301,6 +329,17 @@ function drawGrid(ctx, W, H, accentColor) {
   ctx.restore();
 }
 
+/**
+ * Draws a stylized pill/badge container for text in the canvas.
+ * @param {CanvasRenderingContext2D} ctx - Canvas 2D context.
+ * @param {number} x - Left coordinate.
+ * @param {number} y - Top coordinate.
+ * @param {string} text - Text to render.
+ * @param {string} bgColor - Hex background color.
+ * @param {string} borderColor - Hex border color.
+ * @param {number} fontSize - Font size in pixels.
+ * @param {number} fontWeight - CSS font weight representation.
+ */
 function drawPill(ctx, x, y, text, bgColor, borderColor, fontSize, fontWeight) {
   ctx.save();
   ctx.font = `${fontWeight} ${fontSize}px Outfit, sans-serif`;
@@ -310,10 +349,10 @@ function drawPill(ctx, x, y, text, bgColor, borderColor, fontSize, fontWeight) {
 
   ctx.beginPath();
   ctx.roundRect(x, y, pW, pH, pH / 2);
-  ctx.fillStyle   = hexToRgba(bgColor, 0.25);
+  ctx.fillStyle = hexToRgba(bgColor, 0.25);
   ctx.fill();
   ctx.strokeStyle = hexToRgba(bgColor, 0.6);
-  ctx.lineWidth   = 2;
+  ctx.lineWidth = 2;
   ctx.stroke();
 
   ctx.fillStyle = 'white';
@@ -321,25 +360,43 @@ function drawPill(ctx, x, y, text, bgColor, borderColor, fontSize, fontWeight) {
   ctx.restore();
 }
 
-function drawAnalogyRow(ctx, x, y, icon, value, label, accentColor, maxWidth) {
+/**
+ * Draws a single analogy comparison entry row.
+ * @param {CanvasRenderingContext2D} ctx - Canvas 2D context.
+ * @param {number} x - Left coordinate.
+ * @param {number} y - Top coordinate.
+ * @param {string} icon - Emoji representing the analogy.
+ * @param {string} value - Formatted value string.
+ * @param {string} label - Narrative description label.
+ * @param {string} accentColor - Active hex accent color.
+ */
+function drawAnalogyRow(ctx, x, y, icon, value, label, accentColor) {
   ctx.save();
 
   // Icon circle
-  ctx.font      = '28px serif';
+  ctx.font = '28px serif';
   ctx.fillText(icon, x, y + 28);
 
-  ctx.font      = `700 32px Outfit, sans-serif`;
+  ctx.font = `700 32px Outfit, sans-serif`;
   ctx.fillStyle = accentColor;
   ctx.fillText(value, x + 44, y + 28);
 
-  const valueW  = ctx.measureText(value).width;
-  ctx.font      = '400 18px Inter, sans-serif';
+  const valueW = ctx.measureText(value).width;
+  ctx.font = '400 18px Inter, sans-serif';
   ctx.fillStyle = 'rgba(255,255,255,0.55)';
   ctx.fillText(label, x + 44 + valueW + 10, y + 28);
 
   ctx.restore();
 }
 
+/**
+ * Draws a glowing, shaded 2D representation of a planet matching the tier state.
+ * @param {CanvasRenderingContext2D} ctx - Canvas 2D context.
+ * @param {number} cx - X coordinate of planet center.
+ * @param {number} cy - Y coordinate of planet center.
+ * @param {number} r - Planet radius in pixels.
+ * @param {Object} theme - Active tier style theme map.
+ */
 function drawPlanetDecoration(ctx, cx, cy, r, theme) {
   ctx.save();
 
@@ -353,7 +410,7 @@ function drawPlanetDecoration(ctx, cx, cy, r, theme) {
   ctx.fill();
 
   // Planet base
-  const planetGrad = ctx.createRadialGradient(cx - r*0.25, cy - r*0.25, r*0.05, cx, cy, r);
+  const planetGrad = ctx.createRadialGradient(cx - r * 0.25, cy - r * 0.25, r * 0.05, cx, cy, r);
   planetGrad.addColorStop(0, lightenColor(theme.accentLight, 30));
   planetGrad.addColorStop(0.5, theme.accent);
   planetGrad.addColorStop(1, darkenColor(theme.accent, 40));
@@ -363,7 +420,7 @@ function drawPlanetDecoration(ctx, cx, cy, r, theme) {
   ctx.fill();
 
   // Shading
-  const shadeGrad = ctx.createRadialGradient(cx + r*0.3, cy - r*0.3, 0, cx, cy, r);
+  const shadeGrad = ctx.createRadialGradient(cx + r * 0.3, cy - r * 0.3, 0, cx, cy, r);
   shadeGrad.addColorStop(0, 'rgba(255,255,255,0.15)');
   shadeGrad.addColorStop(0.6, 'rgba(0,0,0,0)');
   shadeGrad.addColorStop(1, 'rgba(0,0,0,0.5)');
@@ -376,24 +433,33 @@ function drawPlanetDecoration(ctx, cx, cy, r, theme) {
   ctx.beginPath();
   ctx.arc(cx, cy, r * 1.15, 0, Math.PI * 2);
   ctx.strokeStyle = hexToRgba(theme.accentLight, 0.3);
-  ctx.lineWidth   = 2;
+  ctx.lineWidth = 2;
   ctx.stroke();
 
   ctx.restore();
 }
 
+/**
+ * Text wrapping algorithm that automatically breaks strings to fit a maximum width.
+ * @param {CanvasRenderingContext2D} ctx - Canvas 2D context.
+ * @param {string} text - Target string.
+ * @param {number} cx - Center coordinate of rendering box.
+ * @param {number} y - Top coordinate of rendering box.
+ * @param {number} maxWidth - Maximum allowed line width in pixels.
+ * @param {number} lineHeight - Step height between lines in pixels.
+ */
 function wrapText(ctx, text, cx, y, maxWidth, lineHeight) {
   const words = text.split(' ');
-  let line    = '';
-  let lineY   = y;
+  let line = '';
+  let lineY = y;
 
   for (const word of words) {
-    const testLine  = line ? `${line} ${word}` : word;
+    const testLine = line ? `${line} ${word}` : word;
     const testWidth = ctx.measureText(testLine).width;
 
     if (testWidth > maxWidth && line) {
       ctx.fillText(line, cx, lineY);
-      line  = word;
+      line = word;
       lineY += lineHeight;
     } else {
       line = testLine;
@@ -402,6 +468,13 @@ function wrapText(ctx, text, cx, y, maxWidth, lineHeight) {
   ctx.fillText(line, cx, lineY);
 }
 
+/**
+ * Evaluates the width of a given string under a specific font-face in pixels.
+ * @param {CanvasRenderingContext2D} ctx - Canvas 2D context.
+ * @param {string} text - Target string.
+ * @param {string} font - Font configuration string.
+ * @returns {number} Evaluated string width in pixels.
+ */
 function measureText(ctx, text, font) {
   ctx.save();
   ctx.font = font;
@@ -412,24 +485,42 @@ function measureText(ctx, text, font) {
 
 // ─── COLOR UTILITIES ─────────────────────────────────────────────────────────
 
+/**
+ * Parses a hex string into an rgba string.
+ * @param {string} hex - Hex color string.
+ * @param {number} alpha - Desired opacity value (0 to 1).
+ * @returns {string} Formatted RGBA string.
+ */
 function hexToRgba(hex, alpha) {
-  const r = parseInt(hex.slice(1,3),16);
-  const g = parseInt(hex.slice(3,5),16);
-  const b = parseInt(hex.slice(5,7),16);
+  const r = parseInt(hex.slice(1, 3), 16);
+  const g = parseInt(hex.slice(3, 5), 16);
+  const b = parseInt(hex.slice(5, 7), 16);
   return `rgba(${r},${g},${b},${alpha})`;
 }
 
+/**
+ * Lightens a hex color by a specified RGB step value.
+ * @param {string} hex - Target hex color.
+ * @param {number} amount - RGB step increase.
+ * @returns {string} Formatted RGB color string.
+ */
 function lightenColor(hex, amount) {
-  const r = Math.min(255, parseInt(hex.slice(1,3),16) + amount);
-  const g = Math.min(255, parseInt(hex.slice(3,5),16) + amount);
-  const b = Math.min(255, parseInt(hex.slice(5,7),16) + amount);
+  const r = Math.min(255, parseInt(hex.slice(1, 3), 16) + amount);
+  const g = Math.min(255, parseInt(hex.slice(3, 5), 16) + amount);
+  const b = Math.min(255, parseInt(hex.slice(5, 7), 16) + amount);
   return `rgb(${r},${g},${b})`;
 }
 
+/**
+ * Darkens a hex color by a specified RGB step value.
+ * @param {string} hex - Target hex color.
+ * @param {number} amount - RGB step decrease.
+ * @returns {string} Formatted RGB color string.
+ */
 function darkenColor(hex, amount) {
-  const r = Math.max(0, parseInt(hex.slice(1,3),16) - amount);
-  const g = Math.max(0, parseInt(hex.slice(3,5),16) - amount);
-  const b = Math.max(0, parseInt(hex.slice(5,7),16) - amount);
+  const r = Math.max(0, parseInt(hex.slice(1, 3), 16) - amount);
+  const g = Math.max(0, parseInt(hex.slice(3, 5), 16) - amount);
+  const b = Math.max(0, parseInt(hex.slice(5, 7), 16) - amount);
   return `rgb(${r},${g},${b})`;
 }
 
@@ -444,9 +535,9 @@ export function downloadCard(canvas, filename = 'carbomirror-card.png') {
   return new Promise((resolve, reject) => {
     canvas.toBlob((blob) => {
       if (!blob) { reject(new Error('Canvas export failed')); return; }
-      const url  = URL.createObjectURL(blob);
+      const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
-      link.href     = url;
+      link.href = url;
       link.download = filename;
       link.click();
       setTimeout(() => URL.revokeObjectURL(url), 5000);
@@ -462,7 +553,6 @@ export function downloadCard(canvas, filename = 'carbomirror-card.png') {
  * @param {string} filename
  */
 export async function nativeShare(canvas, shareText, filename = 'carbomirror-card.png') {
-  // Attempt Web Share API Level 2 (file sharing)
   if (navigator.share && navigator.canShare) {
     try {
       const blob = await canvasToBlob(canvas);
@@ -470,19 +560,17 @@ export async function nativeShare(canvas, shareText, filename = 'carbomirror-car
 
       if (navigator.canShare({ files: [file] })) {
         await navigator.share({
-          title:   'My Carbon Footprint — CarbonMirror',
-          text:    shareText,
-          files:   [file],
+          title: 'My Carbon Footprint — CarbonMirror',
+          text: shareText,
+          files: [file],
         });
         return { method: 'native-share' };
       }
     } catch (e) {
       if (e.name === 'AbortError') return { method: 'aborted' };
-      // Fall through
     }
   }
 
-  // Fallback: share text only (no file)
   if (navigator.share) {
     try {
       await navigator.share({ title: 'My Carbon Footprint — CarbonMirror', text: shareText });
@@ -492,15 +580,14 @@ export async function nativeShare(canvas, shareText, filename = 'carbomirror-car
     }
   }
 
-  // Desktop fallback: download
   await downloadCard(canvas, filename);
   return { method: 'download' };
 }
 
 /**
- * Helper: Canvas → Blob (promisified)
- * @param {HTMLCanvasElement} canvas
- * @returns {Promise<Blob>}
+ * Promisified canvas to blob exporter.
+ * @param {HTMLCanvasElement} canvas - Target canvas.
+ * @returns {Promise<Blob>} Output Blob payload.
  */
 function canvasToBlob(canvas) {
   return new Promise((resolve, reject) => {
@@ -530,12 +617,3 @@ export function generateShareText(data) {
 
   return `${emoji} My annual carbon footprint: ${kgFormatted} kg CO₂ — I'm a ${TIER_THEMES[tier]?.tierLabel || 'Carbon Tracker'}.\n\n${analogyLine}${pledgeLine}\n\nCalculate yours at CarbonMirror 👇\n#CarbonFootprint #SustainabilityIndia #ClimateAction #CarbonMirror`;
 }
-
-/**
- * @typedef {Object} CardData
- * @property {number}   totalKg   - Annual CO₂ in kg
- * @property {string}   tier      - 'green'|'yellow'|'orange'|'red'
- * @property {Object}   analogies - From getAnalogies()
- * @property {string}   userName  - Display name
- * @property {string}   pledge    - Pledge text
- */
